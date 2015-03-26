@@ -16,10 +16,17 @@
 #endif
 
 #ifdef USE_UPNP
+#ifdef WIN32
+#include <miniwget.h>
+#include <miniupnpc.h>
+#include <upnpcommands.h>
+#include <upnperrors.h>
+#else
 #include <miniupnpc/miniwget.h>
 #include <miniupnpc/miniupnpc.h>
 #include <miniupnpc/upnpcommands.h>
 #include <miniupnpc/upnperrors.h>
+#endif
 #endif
 
 using namespace std;
@@ -140,7 +147,7 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer)
 bool RecvLine(SOCKET hSocket, string& strLine)
 {
     strLine = "";
-    loop
+    loopforever
     {
         char c;
         int nBytes = recv(hSocket, &c, 1, 0);
@@ -313,7 +320,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
     {
         if (strLine.empty()) // HTTP response is separated from headers by blank line
         {
-            loop
+            loopforever
             {
                 if (!RecvLine(hSocket, strLine))
                 {
@@ -665,7 +672,7 @@ void ThreadSocketHandler2(void* parg)
     list<CNode*> vNodesDisconnected;
     unsigned int nPrevNodeCount = 0;
 
-    loop
+    loopforever
     {
         //
         // Disconnect nodes
@@ -1078,7 +1085,7 @@ void ThreadMapPort2(void* parg)
         else
             printf("UPnP Port Mapping successful.\n");
         int i = 1;
-        loop {
+        loopforever {
             if (fShutdown || !fUseUPnP)
             {
                 r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype, port.c_str(), "TCP", 0);
@@ -1113,7 +1120,7 @@ void ThreadMapPort2(void* parg)
         freeUPNPDevlist(devlist); devlist = 0;
         if (r != 0)
             FreeUPNPUrls(&urls);
-        loop {
+        loopforever {
             if (fShutdown || !fUseUPnP)
                 return;
             Sleep(2000);
@@ -1348,7 +1355,7 @@ void ThreadOpenConnections2(void* parg)
 
     // Initiate network connections
     int64 nStart = GetTime();
-    loop
+    loopforever
     {
         ProcessOneShot();
 
@@ -1407,7 +1414,7 @@ void ThreadOpenConnections2(void* parg)
         int64 nANow = GetAdjustedTime();
 
         int nTries = 0;
-        loop
+        loopforever
         {
             // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
             CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
@@ -1500,7 +1507,7 @@ void ThreadOpenAddedConnections2(void* parg)
             }
         }
     }
-    loop
+    loopforever
     {
         vector<vector<CService> > vservConnectAddresses = vservAddressesToAdd;
         // Attempt to connect to each IP for each addnode entry until at least one is successful per addnode entry
